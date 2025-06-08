@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Way Too Expensive</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .question-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 700px;
+            margin-bottom: 20px;
+        }
+        .question-text {
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .party-option {
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .party-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        .progress {
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .results {
+            display: none;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 700px;
+            margin-top: 20px;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .results-table th, .results-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .results-table th {
+            background-color: #f2f2f2;
+        }
+        .party-color {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 10px;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <h1>Way Too Expensive</h1>
+    <div class="question-container" id="question-container">
+        <div class="question-text" id="question-text">Question 1</div>
+        <div class="options-grid" id="options-grid">
+            <!-- Options will be inserted here by JavaScript -->
+        </div>
+    </div>
+    <div class="progress" id="progress">Question 1 of 10</div>
+    <div class="results" id="results">
+        <h2>Final Seat Allocation</h2>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Party</th>
+                    <th>Seats</th>
+                </tr>
+            </thead>
+            <tbody id="results-body">
+                <!-- Results will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Party data with colors and full names
+        const parties = [
+            { id: "UDP", color: "#1420B2", name: "UDP" },
+            { id: "KPD", color: "#5E0000", name: "KPD" },
+            { id: "SPD", color: "#DD0000", name: "SPD" },
+            { id: "ASK", color: "#4C4C4C", name: "ASK" },
+            { id: "SBP", color: "#107012", name: "SBP" },
+            { id: "DDP", color: "#EFED08", name: "DDP" },
+            { id: "Z", color: "#000000", name: "Z" },
+            { id: "DVP", color: "#87AD4C", name: "DVP" },
+            { id: "WP", color: "#DDC087", name: "WP" },
+            { id: "DNVP", color: "#3887DD", name: "DNVP" }
+        ];
+
+        // Questions (10 total)
+        const questions = [
+            "How should we address the economic crisis?",
+            "What's your stance on worker protections?",
+            "How should we handle foreign relations?",
+            "What's your approach to education reform?",
+            "How should we manage the national budget?",
+            "What's your position on social welfare?",
+            "How should we approach industrial policy?",
+            "What's your strategy for agricultural reform?",
+            "How should we handle military spending?",
+            "What's your vision for constitutional changes?"
+        ];
+
+        // Game state
+        let currentQuestion = 0;
+        const seatAllocations = {};
+        parties.forEach(party => {
+            seatAllocations[party.id] = 0;
+        });
+
+        // Initialize the game
+        function initGame() {
+            showQuestion();
+        }
+
+        // Display the current question
+        function showQuestion() {
+            document.getElementById('question-text').textContent = questions[currentQuestion];
+            document.getElementById('progress').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+            
+            // Shuffle parties for random order each question
+            const shuffledParties = [...parties].sort(() => Math.random() - 0.5);
+            
+            // Show 4 random parties as options (arches parliament system)
+            const options = shuffledParties.slice(0, 4);
+            
+            options.forEach(party => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'party-option';
+                optionElement.style.backgroundColor = party.color;
+                optionElement.textContent = party.name;
+                optionElement.onclick = () => selectOption(party);
+                optionsGrid.appendChild(optionElement);
+            });
+        }
+
+        // Handle option selection
+        function selectOption(party) {
+            // Random seats between 12-31
+            const seats = Math.floor(Math.random() * 20) + 12;
+            seatAllocations[party.id] += seats;
+            
+            // Move to next question or show results
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Display final results
+        function showResults() {
+            document.getElementById('question-container').style.display = 'none';
+            document.getElementById('progress').style.display = 'none';
+            
+            const resultsBody = document.getElementById('results-body');
+            resultsBody.innerHTML = '';
+            
+            // Sort parties by seats (descending)
+            const sortedParties = [...parties].sort((a, b) => seatAllocations[b.id] - seatAllocations[a.id]);
+            
+            sortedParties.forEach(party => {
+                const row = document.createElement('tr');
+                
+                const nameCell = document.createElement('td');
+                const colorBox = document.createElement('span');
+                colorBox.className = 'party-color';
+                colorBox.style.backgroundColor = party.color;
+                nameCell.appendChild(colorBox);
+                nameCell.appendChild(document.createTextNode(party.name));
+                
+                const seatsCell = document.createElement('td');
+                seatsCell.textContent = seatAllocations[party.id];
+                
+                row.appendChild(nameCell);
+                row.appendChild(seatsCell);
+                resultsBody.appendChild(row);
+            });
+            
+            document.getElementById('results').style.display = 'block';
+        }
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
